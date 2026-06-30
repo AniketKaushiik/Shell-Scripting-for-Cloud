@@ -1,1 +1,53 @@
+#!/bin/bash
 
+<<task
+Deploy a jhango app
+and handle the code for errors
+task
+
+
+Code_clone () {
+        echo "Cloning the app"
+        git clone https://github.com/LondheShubham153/django-notes-app.git
+}
+
+Install_requirements () {
+        echo "Installing Dependencies"
+        sudo apt-get install docker.io nginx -y
+}
+
+Required_restarts () {
+        sudo chown $USER /var/run/docker.sock
+        sudo systemctl enable docker
+        sudo systemctl enable nginx
+        sudo systemctl restart docker
+}
+
+Deploy () {
+        docker build -t notes-app .
+        docker run -d -p 8000:8000 notes-app:latest
+
+}
+
+echo "*******DEPLOYMENT STARTED*******"
+
+if ! Code_clone; then
+        echo "The code directory already exists"
+        cd django-notes-app
+fi
+
+if ! Install_requirements; then
+        echo "Installation failed"
+        exit 1
+fi
+if ! Required_restarts;then
+        echo "System fault identified"
+        exit 1
+fi
+if ! Deploy; then
+        echo "Deployment failed, mailing the admin"
+        #sendmail
+        exit 1
+fi
+
+echo "*******DEPLOYMENT DONE*******"
